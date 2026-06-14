@@ -47,6 +47,8 @@ export async function getOrCreateCart(): Promise<string | null> {
   return inserted?.id ?? null
 }
 
+type InventoryEmbed = { quantity: number; reserved: number }
+
 type RawCartItem = {
   quantity: number
   variant_id: string
@@ -54,9 +56,11 @@ type RawCartItem = {
     price: number | null
     name: string | null
     sku: string | null
+    // inventory.variant_id -> product_variants.id (FK exists here, NOT on cart_items),
+    // so inventory must be embedded under product_variants, not on cart_items.
+    inventory: InventoryEmbed | InventoryEmbed[] | null
     products: { name: string; slug: string; base_price: number } | null
   } | null
-  inventory: { quantity: number; reserved: number } | null
 }
 
 export async function getServerCart(): Promise<ServerCartItem[]> {
@@ -64,15 +68,23 @@ export async function getServerCart(): Promise<ServerCartItem[]> {
   const cartId = await getOrCreateCart()
   if (!cartId) return []
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('cart_items')
     .select(`
       quantity,
       variant_id,
-      product_variants(price, name, sku, products(name, slug, base_price)),
-      inventory(quantity, reserved)
+      product_variants(
+        price, name, sku,
+        inventory(quantity, reserved),
+        products(name, slug, base_price)
+      )
     `)
     .eq('cart_id', cartId)
+
+  if (error) {
+    console.error('[getServerCart] query failed:', error)
+    return []
+  }
 
   const rows = (data ?? []) as unknown as RawCartItem[]
 
@@ -81,7 +93,7 @@ export async function getServerCart(): Promise<ServerCartItem[]> {
     .map(row => {
       const variant = row.product_variants!
       const product = variant.products!
-      const inv = row.inventory
+      const inv = Array.isArray(variant.inventory) ? variant.inventory[0] : variant.inventory
       return {
         variantId: row.variant_id,
         productSlug: product.slug,

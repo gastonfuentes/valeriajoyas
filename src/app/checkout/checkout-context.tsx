@@ -27,6 +27,10 @@ export type CheckoutState = {
   couponValid: boolean
   couponDiscount: number
   couponId: string | null
+  /** Carrier cost in centavos from the last successful quote. null = not yet quoted. */
+  shippingCostCentavos: number | null
+  /** Estimated delivery days from the last successful quote. null = not quoted or unavailable. */
+  shippingEstimatedDays: number | null
 }
 
 type CheckoutContextValue = {
@@ -35,6 +39,7 @@ type CheckoutContextValue = {
   setContact: (contact: ContactData) => void
   setShipping: (shipping: ShippingAddress) => void
   setPickup: (pickup: boolean) => void
+  setShippingQuote: (costCentavos: number | null, estimatedDays: number | null) => void
   applyCoupon: (code: string, discount: number, couponId: string) => void
   clearCoupon: () => void
 }
@@ -50,6 +55,8 @@ const initialState: CheckoutState = {
   couponValid: false,
   couponDiscount: 0,
   couponId: null,
+  shippingCostCentavos: null,
+  shippingEstimatedDays: null,
 }
 
 export function CheckoutProvider({
@@ -79,7 +86,17 @@ export function CheckoutProvider({
   }
 
   function setPickup(pickup: boolean) {
-    setState(prev => ({ ...prev, pickup }))
+    setState(prev => ({
+      ...prev,
+      pickup,
+      // When switching to pickup, clear any carrier quote — pickup has no shipping cost.
+      shippingCostCentavos: pickup ? null : prev.shippingCostCentavos,
+      shippingEstimatedDays: pickup ? null : prev.shippingEstimatedDays,
+    }))
+  }
+
+  function setShippingQuote(costCentavos: number | null, estimatedDays: number | null) {
+    setState(prev => ({ ...prev, shippingCostCentavos: costCentavos, shippingEstimatedDays: estimatedDays }))
   }
 
   function applyCoupon(code: string, discount: number, couponId: string) {
@@ -103,7 +120,7 @@ export function CheckoutProvider({
   }
 
   return (
-    <CheckoutContext.Provider value={{ state, setStep, setContact, setShipping, setPickup, applyCoupon, clearCoupon }}>
+    <CheckoutContext.Provider value={{ state, setStep, setContact, setShipping, setPickup, setShippingQuote, applyCoupon, clearCoupon }}>
       {children}
     </CheckoutContext.Provider>
   )

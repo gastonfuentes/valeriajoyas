@@ -771,10 +771,12 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           currency: string
+          default_item_weight_grams: number
           free_shipping_threshold: number | null
           id: number
           origin_address: Json | null
           origin_postal_code: string | null
+          packaging_weight_grams: number
           pickup_enabled: boolean
           social: Json
           store_name: string
@@ -784,10 +786,12 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           currency?: string
+          default_item_weight_grams?: number
           free_shipping_threshold?: number | null
           id?: number
           origin_address?: Json | null
           origin_postal_code?: string | null
+          packaging_weight_grams?: number
           pickup_enabled?: boolean
           social?: Json
           store_name?: string
@@ -797,10 +801,12 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           currency?: string
+          default_item_weight_grams?: number
           free_shipping_threshold?: number | null
           id?: number
           origin_address?: Json | null
           origin_postal_code?: string | null
+          packaging_weight_grams?: number
           pickup_enabled?: boolean
           social?: Json
           store_name?: string
@@ -813,7 +819,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean }
+      apply_mp_payment: {
+        Args: {
+          p_amount: number
+          p_external_id: string
+          p_order_id: string
+          p_provider: string
+          p_raw: Json
+          p_status: Database["public"]["Enums"]["payment_status"]
+          p_status_detail: string
+        }
+        Returns: Database["public"]["Enums"]["order_status"]
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       chat_role: "user" | "assistant" | "system" | "tool"

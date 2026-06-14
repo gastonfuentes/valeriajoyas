@@ -1,6 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useCheckout, type ShippingAddress } from '../checkout-context'
+import { quoteShipping } from '../actions'
+import { formatARS } from '@/lib/format'
 import type { Database } from '@/lib/database.types'
 
 type AddressRow = Database['public']['Tables']['addresses']['Row']
@@ -16,15 +18,34 @@ const emptyAddress: ShippingAddress = {
 }
 
 export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) {
-  const { setShipping, setPickup, setStep } = useCheckout()
+  const { setShipping, setPickup, setStep, setShippingQuote } = useCheckout()
   const [isPickup, setIsPickup] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string | 'new'>(
     savedAddresses.length > 0 ? savedAddresses[0].id : 'new'
   )
   const [form, setForm] = useState<ShippingAddress>(emptyAddress)
 
+  // Shipping quote state (local, synced to context on success)
+  type QuoteStatus = 'idle' | 'loading' | 'success' | 'invalid'
+  const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>('idle')
+  const [quotedCost, setQuotedCost] = useState<number | null>(null)
+  const [quotedDays, setQuotedDays] = useState<number | null>(null)
+  // Track the last postal code we quoted to avoid redundant fetches
+  const lastQuotedPostalCode = useRef<string>('')
+
   function handlePickupChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setIsPickup(e.target.checked)
+    const checked = e.target.checked
+    setIsPickup(checked)
+    if (checked) {
+      // Clear any pending quote when switching to pickup
+      setQuoteStatus('idle')
+      setQuotedCost(null)
+      setQuotedDays(null)
+      lastQuotedPostalCode.current = ''
+      setShippingQuote(null, null)
+    }
+    // When unchecking pickup, leave the quote null so the steps show "A calcular"
+    // until the user (re)enters a postal code.
   }
 
   function handlePickupSubmit() {
@@ -50,6 +71,49 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
     return form
   }
 
+  async function fetchQuote(postalCode: string) {
+    const trimmed = postalCode.trim()
+    if (!trimmed || trimmed === lastQuotedPostalCode.current) return
+    lastQuotedPostalCode.current = trimmed
+
+    setQuoteStatus('loading')
+    try {
+      const quote = await quoteShipping(trimmed)
+      if (quote) {
+        setQuotedCost(quote.cost)
+        setQuotedDays(quote.estimatedDays)
+        setShippingQuote(quote.cost, quote.estimatedDays)
+        setQuoteStatus('success')
+      } else {
+        setQuotedCost(null)
+        setQuotedDays(null)
+        setShippingQuote(null, null)
+        setQuoteStatus('invalid')
+      }
+    } catch {
+      setQuotedCost(null)
+      setQuotedDays(null)
+      setShippingQuote(null, null)
+      setQuoteStatus('invalid')
+    }
+  }
+
+  function handlePostalCodeBlur(e: React.FocusEvent<HTMLInputElement>) {
+    void fetchQuote(e.target.value)
+  }
+
+  // When user selects a saved address, trigger a quote for its postal code
+  function handleSavedAddressChange(id: string) {
+    setSelectedAddressId(id)
+    lastQuotedPostalCode.current = '' // allow re-quote for the new address
+    if (id !== 'new') {
+      const addr = savedAddresses.find(a => a.id === id)
+      if (addr?.postal_code) {
+        void fetchQuote(addr.postal_code)
+      }
+    }
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const address = getFormAddress()
@@ -57,6 +121,12 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
     setShipping(address)
     setStep('resumen')
   }
+
+  // Determine the postal code currently active for the quote widget
+  const activePostalCode =
+    selectedAddressId !== 'new' && savedAddresses.length > 0
+      ? (savedAddresses.find(a => a.id === selectedAddressId)?.postal_code ?? '')
+      : form.postal_code
 
   return (
     <div className="space-y-6">
@@ -80,7 +150,7 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
       {isPickup ? (
         <div className="space-y-4">
           <p className="text-sm text-[var(--color-muted)]">
-            Pasaremos el domicilio de retiro.
+            Retiro en local — sin costo de envío.
           </p>
           <button
             type="button"
@@ -101,7 +171,7 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
                     name="address"
                     value={addr.id}
                     checked={selectedAddressId === addr.id}
-                    onChange={() => setSelectedAddressId(addr.id)}
+                    onChange={() => handleSavedAddressChange(addr.id)}
                     className="mt-0.5"
                   />
                   <span className="text-sm text-[var(--color-text)]">
@@ -115,7 +185,16 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
                   name="address"
                   value="new"
                   checked={selectedAddressId === 'new'}
-                  onChange={() => setSelectedAddressId('new')}
+                  onChange={() => {
+                    setSelectedAddressId('new')
+                    // Clear the stale quote so the total shows "A calcular" until
+                    // the user provides and blurs a postal code for the new address.
+                    setShippingQuote(null, null)
+                    lastQuotedPostalCode.current = ''
+                    setQuoteStatus('idle')
+                    setQuotedCost(null)
+                    setQuotedDays(null)
+                  }}
                   className="mt-0.5"
                 />
                 <span className="text-sm text-[var(--color-text)]">Agregar nueva dirección</span>
@@ -132,7 +211,6 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
                 { label: 'Piso/Depto', field: 'apartment' as const, type: 'text', required: false },
                 { label: 'Ciudad', field: 'city' as const, type: 'text', required: true },
                 { label: 'Provincia', field: 'province' as const, type: 'text', required: true },
-                { label: 'Código postal', field: 'postal_code' as const, type: 'text', required: true },
               ].map(({ label, field, type, required }) => (
                 <div key={field}>
                   <label className="block text-sm text-[var(--color-text)] mb-1">{label}</label>
@@ -145,6 +223,52 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
                   />
                 </div>
               ))}
+
+              {/* Postal code gets special treatment for blur-based quoting */}
+              <div>
+                <label className="block text-sm text-[var(--color-text)] mb-1">Código postal</label>
+                <input
+                  type="text"
+                  required
+                  value={form.postal_code}
+                  onChange={e => {
+                    const val = e.target.value
+                    setForm(prev => ({ ...prev, postal_code: val }))
+                    // Invalidate previous quote when the user edits the postal code
+                    if (val !== lastQuotedPostalCode.current) {
+                      setQuoteStatus('idle')
+                      setQuotedCost(null)
+                      setQuotedDays(null)
+                      setShippingQuote(null, null)
+                    }
+                  }}
+                  onBlur={handlePostalCodeBlur}
+                  className="w-full border border-[var(--color-border)] px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-primary)]"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Shipping quote widget */}
+          {!isPickup && (
+            <div className="text-sm text-[var(--color-muted)] min-h-[1.5rem]">
+              {quoteStatus === 'loading' && (
+                <span>Calculando envío…</span>
+              )}
+              {quoteStatus === 'success' && quotedCost !== null && (
+                <span className="text-[var(--color-text)]">
+                  Envío estándar: {formatARS(quotedCost)}
+                  {quotedDays != null && (
+                    <span className="text-[var(--color-muted)]"> · Llega en ~{quotedDays} días</span>
+                  )}
+                </span>
+              )}
+              {quoteStatus === 'invalid' && (
+                <span>Ingresá un código postal válido para calcular el envío.</span>
+              )}
+              {quoteStatus === 'idle' && activePostalCode === '' && (
+                <span>Ingresá el código postal para ver el costo de envío.</span>
+              )}
             </div>
           )}
 

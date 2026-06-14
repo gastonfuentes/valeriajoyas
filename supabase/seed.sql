@@ -6,12 +6,14 @@
 -- ---------- store settings (singleton) ----------
 insert into public.store_settings
   (id, store_name, currency, free_shipping_threshold, pickup_enabled,
-   origin_postal_code, contact_email, contact_phone, origin_address)
+   origin_postal_code, contact_email, contact_phone, origin_address,
+   default_item_weight_grams, packaging_weight_grams)
 values
   (1, 'valeria joyas', 'ARS', 5000000, true, '1425',
    'hola@valeriajoyas.com', '+54 9 11 5555-0000',
    jsonb_build_object('street','Av. Santa Fe','number','1234','city','CABA',
-                      'province','Buenos Aires','postal_code','1425','country','AR'))
+                      'province','Buenos Aires','postal_code','1425','country','AR'),
+   30, 100)
 on conflict (id) do nothing;
 
 -- ---------- categories ----------

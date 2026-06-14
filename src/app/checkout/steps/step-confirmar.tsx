@@ -5,7 +5,6 @@ import { useCart } from '@/lib/cart/cart-context'
 import { useCheckout } from '../checkout-context'
 import { formatARS } from '@/lib/format'
 import { createOrder } from '../actions'
-import { PLACEHOLDER_SHIPPING_CENTAVOS } from '@/lib/commerce/shipping-constants'
 import { computeTotals, type PricingCoupon, type PricingShipping } from '@/lib/commerce/pricing'
 
 export function StepConfirmar({
@@ -23,8 +22,10 @@ export function StepConfirmar({
     ? { type: 'fixed', value: state.couponDiscount, minOrder: 0 }
     : null
 
+  // Use the real carrier quote from context; fall back to 0 if not yet quoted.
+  // The authoritative cost is recomputed server-side in createOrder — this is display only.
   const pricingShipping: PricingShipping = {
-    cost: PLACEHOLDER_SHIPPING_CENTAVOS,
+    cost: state.shippingCostCentavos ?? 0,
     freeThreshold: freeShippingThreshold,
     pickup: state.pickup,
   }
@@ -111,14 +112,22 @@ export function StepConfirmar({
         <div className="flex justify-between text-[var(--color-text)]">
           <span>Envío</span>
           <span>
-            {state.pickup || totals.shippingTotal === 0
-              ? (state.pickup ? '$0 (Retiro en local)' : 'Envío gratis')
+            {state.pickup
+              ? 'Retiro en local'
+              : state.shippingCostCentavos === null
+              ? 'A calcular'
+              : totals.shippingTotal === 0
+              ? 'Envío gratis'
               : formatARS(totals.shippingTotal)}
           </span>
         </div>
         <div className="flex justify-between font-medium text-base text-[var(--color-text)] pt-2 border-t border-[var(--color-border)]">
           <span>Total</span>
-          <span>{formatARS(totals.total)}</span>
+          <span>
+            {!state.pickup && state.shippingCostCentavos === null
+              ? 'A calcular'
+              : formatARS(totals.total)}
+          </span>
         </div>
       </div>
 
@@ -128,10 +137,16 @@ export function StepConfirmar({
         </div>
       )}
 
+      {!state.pickup && state.shippingCostCentavos === null && (
+        <p className="text-sm text-[var(--color-muted)]">
+          Calculá el costo de envío para continuar.
+        </p>
+      )}
+
       <button
         type="button"
         onClick={handleFinalize}
-        disabled={loading}
+        disabled={loading || (!state.pickup && state.shippingCostCentavos === null)}
         className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {loading ? 'Procesando…' : 'Finalizar pedido'}

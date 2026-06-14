@@ -4,7 +4,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { validateCoupon } from '@/lib/commerce/coupon'
 import { computeDiscount, computeTotals, type PricingCoupon, type PricingShipping } from '@/lib/commerce/pricing'
 import { getServerCart, clearServerCart } from '@/app/cart/actions'
-import { PLACEHOLDER_SHIPPING_CENTAVOS } from '@/lib/commerce/shipping-constants'
+import { getShippingProvider } from '@/lib/shipping/factory'
+import type { QuoteInput, ShippingQuote } from '@/lib/shipping/types'
 import type { Database } from '@/lib/database.types'
 
 type CouponRow = Database['public']['Tables']['coupons']['Row']
@@ -57,24 +58,86 @@ export async function validateCouponAction(
 export async function getStoreSettings(): Promise<{
   free_shipping_threshold: number | null
   pickup_enabled: boolean
+  origin_postal_code: string | null
+  default_item_weight_grams: number
+  packaging_weight_grams: number
 }> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('store_settings')
-    .select('free_shipping_threshold, pickup_enabled')
+    .select(
+      'free_shipping_threshold, pickup_enabled, origin_postal_code, default_item_weight_grams, packaging_weight_grams',
+    )
     .filter('id', 'eq', 1)
     .maybeSingle()
 
   if (!data) {
-    return { free_shipping_threshold: null, pickup_enabled: false }
+    return {
+      free_shipping_threshold: null,
+      pickup_enabled: false,
+      origin_postal_code: null,
+      default_item_weight_grams: 30,
+      packaging_weight_grams: 100,
+    }
   }
 
-  const row = data as Pick<StoreSettingsRow, 'free_shipping_threshold' | 'pickup_enabled'>
+  const row = data as Pick<
+    StoreSettingsRow,
+    | 'free_shipping_threshold'
+    | 'pickup_enabled'
+    | 'origin_postal_code'
+    | 'default_item_weight_grams'
+    | 'packaging_weight_grams'
+  >
   return {
     free_shipping_threshold: row.free_shipping_threshold,
     pickup_enabled: row.pickup_enabled,
+    origin_postal_code: row.origin_postal_code,
+    default_item_weight_grams: row.default_item_weight_grams,
+    packaging_weight_grams: row.packaging_weight_grams,
   }
 }
+
+// ─── Internal helper ─────────────────────────────────────────────────────────
+
+/**
+ * Build a QuoteInput and call the configured shipping provider.
+ * Returns the first quote, or null if the provider returns no quotes.
+ * Throws if the provider itself throws (network/config error).
+ */
+async function getStandardQuote(
+  destinationPostalCode: string,
+  itemCount: number,
+  settings: Awaited<ReturnType<typeof getStoreSettings>>,
+): Promise<ShippingQuote | null> {
+  const input: QuoteInput = {
+    originPostalCode: settings.origin_postal_code ?? '',
+    destinationPostalCode,
+    itemCount,
+    defaultItemWeightGrams: settings.default_item_weight_grams,
+    packagingWeightGrams: settings.packaging_weight_grams,
+  }
+  const quotes = await getShippingProvider().quote(input)
+  return quotes[0] ?? null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function quoteShipping(
+  destinationPostalCode: string,
+): Promise<ShippingQuote | null> {
+  if (!destinationPostalCode.trim()) return null
+
+  const cartItems = await getServerCart()
+  if (cartItems.length === 0) return null
+
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const settings = await getStoreSettings()
+
+  return getStandardQuote(destinationPostalCode.trim(), itemCount, settings)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export type ShippingAddressSnapshot = {
   recipient_name: string
@@ -174,8 +237,29 @@ export async function createOrder(
   // Get store settings
   const settings = await getStoreSettings()
 
+  // Resolve the carrier cost server-side — never trust a client-supplied value.
+  // For pickup orders the cost field is irrelevant (computeShipping returns 0),
+  // but we still need a number to satisfy the type; use 0.
+  let carrierCost = 0
+  if (!input.pickup) {
+    const trimmedPostalCode = input.shippingAddress?.postal_code?.trim() ?? ''
+    if (!trimmedPostalCode) {
+      return { error: 'Se requiere código postal para calcular el costo de envío.' }
+    }
+    const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+    try {
+      const quote = await getStandardQuote(trimmedPostalCode, itemCount, settings)
+      if (!quote) {
+        return { error: 'No se pudo calcular el costo de envío. Intentá de nuevo.' }
+      }
+      carrierCost = quote.cost
+    } catch {
+      return { error: 'No se pudo calcular el costo de envío. Intentá de nuevo.' }
+    }
+  }
+
   const pricingShipping: PricingShipping = {
-    cost: PLACEHOLDER_SHIPPING_CENTAVOS,
+    cost: carrierCost,
     freeThreshold: settings.free_shipping_threshold,
     pickup: input.pickup,
   }

@@ -51,7 +51,7 @@ export function CheckoutFlow({
       {state.step === 'envio' && (
         <StepEnvio savedAddresses={savedAddresses} />
       )}
-      {state.step === 'resumen' && <StepResumen />}
+      {state.step === 'resumen' && <StepResumen freeShippingThreshold={freeShippingThreshold} />}
       {state.step === 'confirmar' && (
         <StepConfirmar freeShippingThreshold={freeShippingThreshold} />
       )}

@@ -1,23 +1,21 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useCart } from '@/lib/cart/cart-context'
 import { useCheckout } from '../checkout-context'
 import { formatARS } from '@/lib/format'
-import { validateCouponAction, getStoreSettings } from '../actions'
-import { PLACEHOLDER_SHIPPING_CENTAVOS } from '@/lib/commerce/shipping-constants'
+import { validateCouponAction } from '../actions'
 import { computeTotals, type PricingCoupon, type PricingShipping } from '@/lib/commerce/pricing'
 
-export function StepResumen() {
+export function StepResumen({
+  freeShippingThreshold,
+}: {
+  freeShippingThreshold: number | null
+}) {
   const { items, subtotal } = useCart()
   const { state, applyCoupon, clearCoupon, setStep } = useCheckout()
   const [couponInput, setCouponInput] = useState(state.couponCode)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number | null>(null)
-
-  useEffect(() => {
-    getStoreSettings().then(s => setFreeShippingThreshold(s.free_shipping_threshold))
-  }, [])
 
   async function handleApplyCoupon() {
     if (!couponInput.trim()) return
@@ -43,8 +41,10 @@ export function StepResumen() {
       }
     : null
 
+  // Use the real carrier quote from context; fall back to 0 if not yet quoted.
+  // The authoritative cost is recomputed server-side in createOrder — this is display only.
   const pricingShipping: PricingShipping = {
-    cost: PLACEHOLDER_SHIPPING_CENTAVOS,
+    cost: state.shippingCostCentavos ?? 0,
     freeThreshold: freeShippingThreshold,
     pickup: state.pickup,
   }
@@ -114,17 +114,12 @@ export function StepResumen() {
           </div>
         )}
         <div className="flex justify-between text-[var(--color-text)]">
-          <span>
-            Envío
-            {!state.pickup && (
-              <span className="text-[var(--color-muted)] text-xs block">
-                Costo estimado — se calcula en el envío real (Etapa 5)
-              </span>
-            )}
-          </span>
+          <span>Envío</span>
           <span>
             {state.pickup
-              ? '$0 (Retiro en local)'
+              ? 'Retiro en local'
+              : state.shippingCostCentavos === null
+              ? 'A calcular'
               : totals.shippingTotal === 0
               ? 'Envío gratis'
               : formatARS(totals.shippingTotal)}
@@ -132,7 +127,11 @@ export function StepResumen() {
         </div>
         <div className="flex justify-between text-[var(--color-text)] font-medium text-base pt-2 border-t border-[var(--color-border)]">
           <span>Total</span>
-          <span>{formatARS(totals.total)}</span>
+          <span>
+            {!state.pickup && state.shippingCostCentavos === null
+              ? 'A calcular'
+              : formatARS(totals.total)}
+          </span>
         </div>
       </div>
 

@@ -2,19 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { formatARS } from '@/lib/format'
 import type { Database } from '@/lib/database.types'
+import { STATUS_LABELS } from '@/lib/orders/status-labels'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
 type OrderItemRow = Database['public']['Tables']['order_items']['Row']
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pendiente',
-  paid: 'Pagado',
-  fulfilled: 'Preparando',
-  shipped: 'Enviado',
-  delivered: 'Entregado',
-  cancelled: 'Cancelado',
-  refunded: 'Reembolsado',
-}
 
 type PaymentBannerVariant = 'paid' | 'pending' | 'cancelled' | 'refunded'
 

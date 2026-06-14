@@ -2,8 +2,11 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const NAV_LINKS = [{ label: 'Pedidos', href: '/admin/pedidos' }]
-const DISABLED_LINKS = ['Productos', 'Cupones', 'Ajustes']
+const NAV_LINKS = [
+  { label: 'Pedidos', href: '/admin/pedidos' },
+  { label: 'Productos', href: '/admin/productos' },
+]
+const DISABLED_LINKS = ['Cupones', 'Ajustes']
 
 export function AdminNav() {
   const pathname = usePathname()

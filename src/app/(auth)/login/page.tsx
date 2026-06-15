@@ -45,6 +45,14 @@ function LoginForm() {
             autoComplete="current-password"
             className="w-full border border-[var(--color-border)] px-3 py-2.5 text-sm bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
           />
+          <div className="mt-1 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] underline underline-offset-2"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </div>
         <button
           type="submit"

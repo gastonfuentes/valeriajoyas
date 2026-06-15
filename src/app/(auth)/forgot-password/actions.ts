@@ -1,0 +1,20 @@
+'use server'
+
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = ((formData.get('email') as string | null) ?? '').trim()
+
+  if (email.length > 0) {
+    const supabase = await createClient()
+    // Supabase does not error on an unknown email (anti-enumeration); we ignore
+    // the result and always show the same generic message so the form never
+    // reveals whether an account exists.
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+    })
+  }
+
+  redirect('/forgot-password?sent=1')
+}

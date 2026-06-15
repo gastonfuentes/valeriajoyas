@@ -6,8 +6,9 @@ const NAV_LINKS = [
   { label: 'Pedidos', href: '/admin/pedidos' },
   { label: 'Productos', href: '/admin/productos' },
   { label: 'Cupones', href: '/admin/cupones' },
+  { label: 'Ajustes', href: '/admin/ajustes' },
 ]
-const DISABLED_LINKS = ['Ajustes']
+const DISABLED_LINKS: string[] = []
 
 export function AdminNav() {
   const pathname = usePathname()

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import './globals.css'
 import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 import { CartProvider } from '@/lib/cart/cart-context'
 
 const cormorant = Cormorant_Garamond({
@@ -31,11 +32,7 @@ export default function RootLayout({
         <CartProvider>
           <SiteHeader />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-[var(--color-border)] py-8 mt-16">
-            <div className="max-w-6xl mx-auto px-4 text-center text-sm text-[var(--color-muted)]">
-              <p>© {new Date().getFullYear()} valeria joyas · Joyas de plata 925 · Buenos Aires</p>
-            </div>
-          </footer>
+          <SiteFooter />
         </CartProvider>
       </body>
     </html>

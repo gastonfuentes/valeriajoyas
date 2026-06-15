@@ -5,22 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createMpPayment } from '@/lib/mercadopago/client'
 import { mapMpPaymentStatus } from '@/lib/mercadopago/status'
+import { getSiteOrigin } from '@/lib/http/site-origin'
 import type { Database } from '@/lib/database.types'
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
-
-// Build the public base URL for the MP webhook. Prefer a valid https site URL,
-// but fall back to the actual request origin so a misconfigured (or localhost)
-// NEXT_PUBLIC_SITE_URL can never produce an invalid notification_url.
-function getBaseUrl(req: NextRequest): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
-  if (configured && /^https:\/\//.test(configured) && !configured.includes('localhost')) {
-    return configured
-  }
-  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? ''
-  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
-  return `${proto}://${host}`
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -71,7 +59,7 @@ export async function POST(req: NextRequest) {
         issuer_id: formData.issuer_id,
         payer: formData.payer,
         external_reference: orderId,
-        notification_url: `${getBaseUrl(req)}/api/webhooks/mercadopago`,
+        notification_url: `${getSiteOrigin(req.headers)}/api/webhooks/mercadopago`,
       })
     } catch (mpErr) {
       console.error('[payments/process] Mercado Pago error:', mpErr)

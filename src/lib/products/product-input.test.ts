@@ -30,6 +30,13 @@ describe('validateProductFields', () => {
     expect(result.value.basePriceCentavos).toBe(50050)
   })
 
+  it('reads an es-AR thousands-dotted price (50.000 = fifty thousand, not 50)', () => {
+    const result = validateProductFields({ ...base, priceInput: '50.000' })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.basePriceCentavos).toBe(5000000)
+  })
+
   it('trims the name', () => {
     const result = validateProductFields({ ...base, name: '  Aro Luna  ' })
     expect(result.ok).toBe(true)

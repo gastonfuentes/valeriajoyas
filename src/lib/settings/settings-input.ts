@@ -2,6 +2,8 @@
 // Takes the raw form values and returns either a normalized, persistence-ready
 // value (money in CENTAVOS, weights in GRAMS) or per-field errors.
 
+import { parseArsAmount } from '@/lib/format'
+
 const MAX_TEXT_LENGTH = 200
 
 export type StoreSettingsInput = {
@@ -36,17 +38,6 @@ export type ValidateStoreSettingsResult =
   | { ok: true; value: StoreSettingsValue }
   | { ok: false; errors: StoreSettingsErrors }
 
-/**
- * Parse an es-AR money string into a pesos number. In es-AR the DOT is the
- * thousands separator and the COMMA is the decimal, so '50.000' = fifty thousand
- * and '1.000,50' = 1000.50. Strip grouping dots first, then turn the decimal
- * comma into a dot for Number(). NEVER parseFloat — and never leave a bare
- * replace(',', '.') that would read '50.000' as 50 (a 1000x silent truncation).
- */
-function parseAmount(s: string): number {
-  return Number(s.trim().replace(/\./g, '').replace(',', '.'))
-}
-
 const PHONE_RE = /^[+0-9()\-.\s]+$/
 
 /** Parse a required non-negative integer (grams). Returns null when invalid. */
@@ -65,7 +56,7 @@ export function validateStoreSettings(input: StoreSettingsInput): ValidateStoreS
   let freeShippingThreshold: number | null = null
   const freeRaw = input.freeShippingThresholdInput.trim()
   if (freeRaw.length > 0) {
-    const pesos = parseAmount(freeRaw)
+    const pesos = parseArsAmount(freeRaw)
     if (!Number.isFinite(pesos)) {
       errors.freeShipping = 'Umbral inválido.'
     } else {

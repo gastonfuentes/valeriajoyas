@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createCoupon, updateCoupon, type CouponFormValues } from './actions'
+import { parseArsAmount } from '@/lib/format'
 
 type InitialValues = CouponFormValues & { id: string }
 
@@ -12,11 +13,6 @@ const AR_TZ = 'America/Argentina/Buenos_Aires'
 // regardless of the UTC offset Supabase returns.
 function isoToArDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-CA', { timeZone: AR_TZ })
-}
-
-// Tolerate the es-AR comma decimal separator; returns NaN for anything else.
-function parseAmount(s: string): number {
-  return Number(s.trim().replace(',', '.'))
 }
 
 export function CouponForm({ initial }: { initial?: InitialValues | null }) {
@@ -53,12 +49,12 @@ export function CouponForm({ initial }: { initial?: InitialValues | null }) {
     setErrors({})
     setGeneralError(null)
 
-    const rawValue = parseAmount(valueDisplay)
+    const rawValue = parseArsAmount(valueDisplay)
     if (!Number.isFinite(rawValue)) {
       setErrors({ value: 'Ingresá un valor válido.' })
       return
     }
-    const rawMinOrder = minOrderDisplay.trim() ? parseAmount(minOrderDisplay) : 0
+    const rawMinOrder = minOrderDisplay.trim() ? parseArsAmount(minOrderDisplay) : 0
     if (!Number.isFinite(rawMinOrder)) {
       setErrors({ minOrder: 'Ingresá un mínimo válido.' })
       return

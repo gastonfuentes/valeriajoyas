@@ -2,6 +2,8 @@
 // Mirrors the coupon-input contract: takes the raw form values and returns either a
 // normalized, persistence-ready value (money in CENTAVOS) or per-field errors.
 
+import { parseArsAmount } from '@/lib/format'
+
 const MAX_NAME_LENGTH = 120
 const MAX_DESCRIPTION_LENGTH = 5000
 
@@ -31,15 +33,6 @@ export type ValidateProductFieldsResult =
   | { ok: true; value: ProductFieldsValue }
   | { ok: false; errors: ProductFieldErrors }
 
-/**
- * Parse an es-AR money string into a pesos number. Comma is the decimal
- * separator. NEVER parseFloat — it truncates comma decimals silently
- * ('500,50' -> 500). Matches the coupon slice's parseAmount.
- */
-function parseAmount(s: string): number {
-  return Number(s.trim().replace(',', '.'))
-}
-
 function pesosToCentavos(pesos: number): number {
   return Math.round(pesos * 100)
 }
@@ -57,7 +50,7 @@ export function validateProductFields(input: ProductFieldsInput): ValidateProduc
 
   // Base price (required, > 0)
   let basePriceCentavos: number | null = null
-  const pesos = parseAmount(input.priceInput)
+  const pesos = parseArsAmount(input.priceInput)
   if (!Number.isFinite(pesos)) {
     errors.price = 'Precio inválido.'
   } else {
@@ -73,7 +66,7 @@ export function validateProductFields(input: ProductFieldsInput): ValidateProduc
   let compareAtPriceCentavos: number | null = null
   const compareRaw = input.compareAtPriceInput.trim()
   if (compareRaw.length > 0) {
-    const comparePesos = parseAmount(compareRaw)
+    const comparePesos = parseArsAmount(compareRaw)
     if (!Number.isFinite(comparePesos)) {
       errors.compareAtPrice = 'Precio comparativo inválido.'
     } else {

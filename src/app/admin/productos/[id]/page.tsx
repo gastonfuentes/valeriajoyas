@@ -6,6 +6,8 @@ import { availableToSell, stockLevel } from '@/lib/inventory/stock'
 import { PRODUCT_STATUS_LABELS, type ProductStatus } from '@/lib/products/status'
 import { ProductStatusControl } from './product-status-control'
 import { VariantStockControl } from './variant-stock-control'
+import { ProductEditForm } from './product-edit-form'
+import { ProductImagesManager, type ProductImage } from './product-images-manager'
 
 type RawInv = { quantity: number; reserved: number; low_stock_threshold: number }
 type RawVariant = {
@@ -22,9 +24,11 @@ type RawProduct = {
   slug: string
   status: string
   material: string | null
+  description: string | null
   base_price: number
   compare_at_price: number | null
   is_featured: boolean
+  product_images: ProductImage[] | null
   product_variants: RawVariant[] | null
 }
 
@@ -46,7 +50,7 @@ export default async function AdminProductoPage({
   const { data } = await supabase
     .from('products')
     .select(
-      'id, name, slug, status, material, base_price, compare_at_price, is_featured, product_variants(id, name, sku, price, is_active, inventory(quantity, reserved, low_stock_threshold))',
+      'id, name, slug, status, material, description, base_price, compare_at_price, is_featured, product_images(id, storage_path, alt, position, is_primary), product_variants(id, name, sku, price, is_active, inventory(quantity, reserved, low_stock_threshold))',
     )
     .eq('id', id)
     .maybeSingle()
@@ -54,6 +58,9 @@ export default async function AdminProductoPage({
   if (!data) notFound()
   const product = data as unknown as RawProduct
   const variants = product.product_variants ?? []
+  const images = [...(product.product_images ?? [])].sort(
+    (a, b) => a.position - b.position || a.id.localeCompare(b.id),
+  )
 
   return (
     <div className="space-y-8 max-w-2xl">
@@ -76,26 +83,30 @@ export default async function AdminProductoPage({
         </div>
       </div>
 
-      {/* Details (read-only in this slice) */}
-      <div className="space-y-1 text-sm">
-        <div className="flex justify-between">
-          <span className="text-[var(--color-muted)]">Precio base</span>
-          <span className="text-[var(--color-text)]">{formatARS(product.base_price)}</span>
-        </div>
-        {product.compare_at_price != null && (
-          <div className="flex justify-between">
-            <span className="text-[var(--color-muted)]">Precio comparativo</span>
-            <span className="text-[var(--color-muted)] line-through">
-              {formatARS(product.compare_at_price)}
-            </span>
-          </div>
-        )}
+      {/* Edit product fields */}
+      <div className="space-y-3">
+        <h2 className="text-xs tracking-widest text-[var(--color-muted)] uppercase">
+          Editar producto
+        </h2>
+        <ProductEditForm
+          productId={product.id}
+          initialName={product.name}
+          initialBasePriceCentavos={product.base_price}
+          initialCompareAtPriceCentavos={product.compare_at_price}
+          initialDescription={product.description}
+          initialIsFeatured={product.is_featured}
+        />
         {product.material && (
-          <div className="flex justify-between">
-            <span className="text-[var(--color-muted)]">Material</span>
-            <span className="text-[var(--color-text)]">{product.material}</span>
-          </div>
+          <p className="text-xs text-[var(--color-muted)]">Material: {product.material}</p>
         )}
+      </div>
+
+      {/* Images */}
+      <div className="space-y-3">
+        <h2 className="text-xs tracking-widest text-[var(--color-muted)] uppercase">
+          Imágenes
+        </h2>
+        <ProductImagesManager productId={product.id} images={images} />
       </div>
 
       {/* Status control */}

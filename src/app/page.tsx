@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/product-card'
+import { pickCardImages, type CardImageInput } from '@/lib/products/image-display'
 import type { Tables } from '@/lib/database.types'
+
+type FeaturedProduct = Tables<'products'> & { product_images: CardImageInput[] | null }
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -9,7 +12,7 @@ export default async function HomePage() {
   const [featuredResult, categoriesResult] = await Promise.all([
     supabase
       .from('products')
-      .select('*')
+      .select('*, product_images(storage_path, is_primary, position)')
       .eq('status', 'active')
       .eq('is_featured', true)
       .limit(8),
@@ -20,7 +23,7 @@ export default async function HomePage() {
       .order('position'),
   ])
 
-  const featured = featuredResult.data as Tables<'products'>[] | null
+  const featured = featuredResult.data as FeaturedProduct[] | null
   const categories = categoriesResult.data as Tables<'categories'>[] | null
 
   return (
@@ -77,9 +80,17 @@ export default async function HomePage() {
             Destacados
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {featured.map((product) => {
+              const { primary, secondary } = pickCardImages(product.product_images ?? [])
+              return (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  primaryImage={primary}
+                  secondaryImage={secondary}
+                />
+              )
+            })}
           </div>
         </section>
       )}

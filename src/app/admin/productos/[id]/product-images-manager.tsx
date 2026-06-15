@@ -10,9 +10,9 @@ import {
   MAX_IMAGES_PER_PRODUCT,
 } from '@/lib/products/image-input'
 import { recordProductImage, deleteProductImage, setPrimaryImage } from '../actions'
+import { buildProductImageUrl } from '@/lib/products/image-display'
 
 const PRODUCT_IMAGES_BUCKET = 'product-images'
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 
 export type ProductImage = {
   id: string
@@ -20,10 +20,6 @@ export type ProductImage = {
   alt: string | null
   is_primary: boolean
   position: number
-}
-
-function buildImageUrl(storagePath: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/${storagePath}`
 }
 
 export function ProductImagesManager({
@@ -134,7 +130,7 @@ export function ProductImagesManager({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={buildImageUrl(img.storage_path)}
+                src={buildProductImageUrl(img.storage_path)}
                 alt={img.alt || `Imagen ${img.position + 1}${img.is_primary ? ' (principal)' : ''}`}
                 className="aspect-square w-full object-cover"
               />

@@ -2,10 +2,12 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/product-card'
 import { CatalogFilters } from '@/components/catalog-filters'
+import { pickCardImages, type CardImageInput } from '@/lib/products/image-display'
 import type { Database } from '@/lib/database.types'
 import Link from 'next/link'
 
 type Product = Database['public']['Tables']['products']['Row']
+type ProductWithImages = Product & { product_images: CardImageInput[] | null }
 type Category = Database['public']['Tables']['categories']['Row']
 type ProductCategory = Database['public']['Tables']['product_categories']['Row']
 
@@ -84,7 +86,9 @@ export default async function ProductosPage({ searchParams }: PageProps) {
 
   // Build product query with DB-side filtering using .filter() to avoid Postgrest 14.5 narrowing
   const { data: productsRaw } = await (async () => {
-    let q = supabase.from('products').select('*')
+    let q = supabase
+      .from('products')
+      .select('*, product_images(storage_path, is_primary, position)')
     q = q.filter('status', 'eq', 'active') as typeof q
 
     if (params.q) {
@@ -122,7 +126,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
     return q
   })()
 
-  const products = (productsRaw ?? []) as Product[]
+  const products = (productsRaw ?? []) as ProductWithImages[]
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
@@ -151,9 +155,17 @@ export default async function ProductosPage({ searchParams }: PageProps) {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {products.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {products.map(product => {
+                const { primary, secondary } = pickCardImages(product.product_images ?? [])
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    primaryImage={primary}
+                    secondaryImage={secondary}
+                  />
+                )
+              })}
             </div>
           )}
         </div>

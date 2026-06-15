@@ -1,11 +1,16 @@
 import Link from 'next/link'
 import { formatARS } from '@/lib/format'
+import { buildProductImageUrl } from '@/lib/products/image-display'
 import type { Tables } from '@/lib/database.types'
 
 type Product = Tables<'products'>
 
 interface ProductCardProps {
   product: Product
+  /** Primary image storage_path; falls back to a monogram when absent. */
+  primaryImage?: string | null
+  /** Optional second image shown on hover. */
+  secondaryImage?: string | null
 }
 
 function Monogram({ name }: { name: string }) {
@@ -28,13 +33,37 @@ function Monogram({ name }: { name: string }) {
   )
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, primaryImage, secondaryImage }: ProductCardProps) {
   return (
     <Link
       href={`/productos/${product.slug}`}
       className="group block hover:opacity-90 transition-opacity"
     >
-      <Monogram name={product.name} />
+      {primaryImage ? (
+        <div className="relative aspect-square bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={buildProductImageUrl(primaryImage)}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover"
+          />
+          {secondaryImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={buildProductImageUrl(secondaryImage)}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            />
+          )}
+        </div>
+      ) : (
+        <Monogram name={product.name} />
+      )}
       <div className="mt-3 space-y-1 px-0.5">
         <p
           style={{ fontFamily: 'var(--font-serif)' }}

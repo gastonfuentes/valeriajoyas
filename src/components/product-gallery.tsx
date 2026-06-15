@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { buildProductImageUrl } from '@/lib/products/image-display'
 
 interface GalleryImage {
   storage_path: string
@@ -30,12 +31,6 @@ function Monogram({ name }: { name: string }) {
   )
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-
-function buildImageUrl(storagePath: string): string {
-  return `${SUPABASE_URL}/storage/v1/object/public/product-images/${storagePath}`
-}
-
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
 
@@ -51,7 +46,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       <div className="aspect-square bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={buildImageUrl(selected.storage_path)}
+          src={buildProductImageUrl(selected.storage_path)}
           alt={selected.alt}
           className="w-full h-full object-cover"
         />
@@ -73,7 +68,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={buildImageUrl(img.storage_path)}
+                src={buildProductImageUrl(img.storage_path)}
                 alt={img.alt}
                 className="w-full h-full object-cover"
               />

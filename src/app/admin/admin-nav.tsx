@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation'
 const NAV_LINKS = [
   { label: 'Pedidos', href: '/admin/pedidos' },
   { label: 'Productos', href: '/admin/productos' },
+  { label: 'Cupones', href: '/admin/cupones' },
 ]
-const DISABLED_LINKS = ['Cupones', 'Ajustes']
+const DISABLED_LINKS = ['Ajustes']
 
 export function AdminNav() {
   const pathname = usePathname()

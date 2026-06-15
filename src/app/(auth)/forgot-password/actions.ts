@@ -12,7 +12,10 @@ export async function requestPasswordReset(formData: FormData) {
     // the result and always show the same generic message so the form never
     // reveals whether an account exists.
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+      // A dedicated, query-param-free callback: Supabase appends ?code=... and the
+      // route redirects to /reset-password. A custom ?next= here is NOT preserved
+      // by Supabase (it falls back to the Site URL).
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset`,
     })
   }
 

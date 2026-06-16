@@ -27,9 +27,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .filter('slug', 'eq', slug)
     .filter('status', 'eq', 'active')
     .maybeSingle()
-  if (!data) return { title: 'valeria joyas' }
+  if (!data) return { title: 'Luna Valen' }
   const product = data as Pick<Product, 'name'>
-  return { title: `${product.name} · valeria joyas` }
+  return { title: `${product.name} · Luna Valen` }
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {

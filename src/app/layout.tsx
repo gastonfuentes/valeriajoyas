@@ -17,7 +17,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'valeria joyas — Joyas de plata',
+  title: 'Luna Valen — Joyas de plata',
   description: 'Joyas de plata 925, diseño minimalista. Buenos Aires, Argentina.',
 }
 

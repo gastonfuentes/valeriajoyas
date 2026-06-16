@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { Hero } from '@/components/hero'
 import { ProductCard } from '@/components/product-card'
 import { Reveal } from '@/components/reveal'
 import { pickCardImages, type CardImageInput } from '@/lib/products/image-display'
@@ -28,25 +29,9 @@ export default async function HomePage() {
   const categories = categoriesResult.data as Tables<'categories'>[] | null
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-16 space-y-24">
-      {/* Hero */}
-      <section className="text-center py-16 space-y-6">
-        <h1
-          style={{ fontFamily: 'var(--font-serif)' }}
-          className="text-5xl md:text-7xl font-light tracking-[0.12em] lowercase text-[var(--color-text)]"
-        >
-          valeria joyas
-        </h1>
-        <p className="text-[var(--color-muted)] text-lg tracking-wide max-w-md mx-auto">
-          Joyas de plata 925, diseño minimalista
-        </p>
-        <Link
-          href="/productos"
-          className="inline-block mt-4 px-8 py-3 bg-[var(--color-primary)] text-white text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors"
-        >
-          Ver catálogo
-        </Link>
-      </section>
+    <>
+      <Hero />
+      <div className="max-w-6xl mx-auto px-4 py-16 space-y-24">
 
       {/* Categories */}
       {categories && categories.length > 0 && (
@@ -96,6 +81,7 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-    </div>
+      </div>
+    </>
   )
 }

@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       mpPayment = await createMpPayment({
         transaction_amount: transactionAmount,
         token: formData.token,
-        description: `Pedido #${order.order_number} - valeria joyas`,
+        description: `Pedido #${order.order_number} - Luna Valen`,
         installments: formData.installments,
         payment_method_id: formData.payment_method_id,
         issuer_id: formData.issuer_id,

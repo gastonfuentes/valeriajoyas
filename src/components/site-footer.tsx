@@ -36,7 +36,7 @@ export async function SiteFooter() {
             )}
           </p>
         )}
-        <p>© {year} valeria joyas · Joyas de plata 925 · Buenos Aires</p>
+        <p>© {year} Luna Valen · Joyas de plata 925 · Buenos Aires</p>
       </div>
     </footer>
   )

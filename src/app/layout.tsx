@@ -27,8 +27,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es-AR" className={`${cormorant.variable} ${inter.variable}`}>
+    <html
+      lang="es-AR"
+      className={`${cormorant.variable} ${inter.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen flex flex-col">
+        {/* Mark JS as available before first paint, so scroll-reveal elements
+            can start hidden without a flicker and stay visible when JS is off. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
         <CartProvider>
           <SiteHeader />
           <main className="flex-1">{children}</main>

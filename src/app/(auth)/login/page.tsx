@@ -48,7 +48,7 @@ function LoginForm() {
           <div className="mt-1 text-right">
             <Link
               href="/forgot-password"
-              className="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] underline underline-offset-2"
+              className="text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] underline underline-offset-2 press focus-ring"
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -56,7 +56,7 @@ function LoginForm() {
         </div>
         <button
           type="submit"
-          className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors press focus-ring"
         >
           Iniciar sesión
         </button>
@@ -74,7 +74,7 @@ function LoginForm() {
       <form action={loginWithGoogle}>
         <button
           type="submit"
-          className="w-full border border-[var(--color-border)] py-3 text-sm text-[var(--color-text)] hover:border-[var(--color-primary)] transition-colors"
+          className="w-full border border-[var(--color-border)] py-3 text-sm text-[var(--color-text)] hover:border-[var(--color-primary)] transition-colors press focus-ring"
         >
           Continuar con Google
         </button>
@@ -82,7 +82,7 @@ function LoginForm() {
 
       <p className="text-center text-sm text-[var(--color-muted)]">
         ¿No tenés cuenta?{' '}
-        <Link href="/register" className="text-[var(--color-text)] underline underline-offset-2">
+        <Link href="/register" className="text-[var(--color-text)] underline underline-offset-2 press focus-ring">
           Crear cuenta
         </Link>
       </p>

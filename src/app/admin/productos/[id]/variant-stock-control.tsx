@@ -52,7 +52,7 @@ export function VariantStockControl({
           onClick={save}
           disabled={loading || !changed}
           aria-busy={loading}
-          className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors disabled:opacity-50"
+          className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors disabled:opacity-50 press focus-ring"
         >
           {loading ? 'Guardando…' : 'Guardar'}
         </button>

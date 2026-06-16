@@ -147,7 +147,7 @@ export function StepConfirmar({
         type="button"
         onClick={handleFinalize}
         disabled={loading || (!state.pickup && state.shippingCostCentavos === null)}
-        className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 press focus-ring"
       >
         {loading ? 'Procesando…' : 'Finalizar pedido'}
       </button>

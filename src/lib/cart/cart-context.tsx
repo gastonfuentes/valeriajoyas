@@ -1,6 +1,7 @@
 'use client'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { applyAdd, applySetQty, applyRemove } from '@/lib/cart/reducers'
 import {
   getServerCart,
   addItem,
@@ -26,6 +27,8 @@ interface CartContextValue {
   items: CartItem[]
   count: number
   subtotal: number
+  /** Variant IDs with a server mutation in flight (used to guard double-clicks). */
+  pending: Set<string>
   add: (item: CartItem) => void
   removeItem: (variantId: string) => void
   setQty: (variantId: string, n: number) => void
@@ -70,6 +73,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [hydrated, setHydrated] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [pending, setPending] = useState<Set<string>>(new Set())
+
+  // Mirror of the latest committed items, read synchronously as the rollback snapshot.
+  const itemsRef = useRef<CartItem[]>([])
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
 
   useEffect(() => {
     const supabase = createClient()
@@ -127,47 +137,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, hydrated, isLoggedIn])
 
-  async function add(item: CartItem) {
-    if (isLoggedIn) {
-      await addItem(item.variantId, item.quantity)
+  // Fire the server mutation in the background, then overwrite with the
+  // authoritative server cart. Roll back to the snapshot if it fails.
+  async function reconcile(
+    variantId: string,
+    action: () => Promise<unknown>,
+    snapshot: CartItem[]
+  ) {
+    setPending(p => new Set(p).add(variantId))
+    try {
+      await action()
       const serverItems = await getServerCart()
       setItems(serverItems.map(serverItemToCartItem))
-    } else {
-      setItems(prev => {
-        const existing = prev.find(i => i.variantId === item.variantId)
-        if (existing) {
-          return prev.map(i =>
-            i.variantId === item.variantId
-              ? { ...i, quantity: Math.min(i.quantity + item.quantity, i.maxQty) }
-              : i
-          )
-        }
-        return [...prev, item]
+    } catch (err) {
+      console.error('[cart] reconcile failed, rolling back', err)
+      setItems(snapshot)
+    } finally {
+      setPending(p => {
+        const next = new Set(p)
+        next.delete(variantId)
+        return next
       })
     }
   }
 
-  async function removeItem(variantId: string) {
+  function add(item: CartItem) {
+    setItems(prev => applyAdd(prev, item)) // instant for everyone
     if (isLoggedIn) {
-      await removeItemAction(variantId)
-      const serverItems = await getServerCart()
-      setItems(serverItems.map(serverItemToCartItem))
-    } else {
-      setItems(prev => prev.filter(i => i.variantId !== variantId))
+      reconcile(item.variantId, () => addItem(item.variantId, item.quantity), itemsRef.current)
     }
   }
 
-  async function setQty(variantId: string, n: number) {
+  function removeItem(variantId: string) {
+    setItems(prev => applyRemove(prev, variantId))
     if (isLoggedIn) {
-      await setItemQtyAction(variantId, n)
-      const serverItems = await getServerCart()
-      setItems(serverItems.map(serverItemToCartItem))
-    } else {
-      setItems(prev =>
-        prev
-          .map(i => (i.variantId === variantId ? { ...i, quantity: Math.max(1, Math.min(n, i.maxQty)) } : i))
-          .filter(i => i.quantity > 0)
-      )
+      reconcile(variantId, () => removeItemAction(variantId), itemsRef.current)
+    }
+  }
+
+  function setQty(variantId: string, n: number) {
+    setItems(prev => applySetQty(prev, variantId, n))
+    if (isLoggedIn) {
+      reconcile(variantId, () => setItemQtyAction(variantId, n), itemsRef.current)
     }
   }
 
@@ -184,7 +195,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const subtotal = items.reduce((acc, i) => acc + i.unitPrice * i.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, count, subtotal, add, removeItem, setQty, clear }}>
+    <CartContext.Provider value={{ items, count, subtotal, pending, add, removeItem, setQty, clear }}>
       {children}
     </CartContext.Provider>
   )

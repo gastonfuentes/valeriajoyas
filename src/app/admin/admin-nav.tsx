@@ -23,8 +23,8 @@ export function AdminNav() {
             href={href}
             className={
               active
-                ? 'border-l-2 border-[var(--color-text)] pl-3 text-sm font-medium text-[var(--color-text)] py-1'
-                : 'pl-4 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] py-1 transition-colors'
+                ? 'border-l-2 border-[var(--color-text)] pl-3 text-sm font-medium text-[var(--color-text)] py-1 press focus-ring'
+                : 'pl-4 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] py-1 transition-colors press focus-ring'
             }
           >
             {label}

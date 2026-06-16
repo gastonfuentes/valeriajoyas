@@ -62,7 +62,7 @@ export function OrderStatusControl({
                 type="button"
                 onClick={() => setShippedExpanded((v) => !v)}
                 disabled={loading}
-                className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors disabled:opacity-50"
+                className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors disabled:opacity-50 press focus-ring"
               >
                 Marcar como {STATUS_LABELS[next].toLowerCase()}
               </button>
@@ -118,7 +118,7 @@ export function OrderStatusControl({
             type="button"
             onClick={() => handleTransition('shipped')}
             disabled={loading || !trackingNumber.trim() || !carrier.trim()}
-            className="bg-[var(--color-primary)] text-white text-sm px-6 py-2 tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="bg-[var(--color-primary)] text-white text-sm px-6 py-2 tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 press focus-ring"
           >
             {loading ? 'Procesando…' : 'Confirmar envío'}
           </button>

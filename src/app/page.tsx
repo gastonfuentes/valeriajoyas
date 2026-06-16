@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/product-card'
+import { Reveal } from '@/components/reveal'
 import { pickCardImages, type CardImageInput } from '@/lib/products/image-display'
 import type { Tables } from '@/lib/database.types'
 
@@ -49,7 +50,7 @@ export default async function HomePage() {
 
       {/* Categories */}
       {categories && categories.length > 0 && (
-        <section>
+        <Reveal as="section">
           <h2
             style={{ fontFamily: 'var(--font-serif)' }}
             className="text-2xl font-light tracking-wide mb-8 text-[var(--color-text)]"
@@ -61,13 +62,13 @@ export default async function HomePage() {
               <Link
                 key={cat.id}
                 href={`/productos?cat=${cat.slug}`}
-                className="px-5 py-2 border border-[var(--color-border)] text-sm text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)] transition-colors"
+                className="px-5 py-2 border border-[var(--color-border)] text-sm text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)] transition-colors press focus-ring"
               >
                 {cat.name}
               </Link>
             ))}
           </div>
-        </section>
+        </Reveal>
       )}
 
       {/* Featured products */}
@@ -80,15 +81,16 @@ export default async function HomePage() {
             Destacados
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {featured.map((product) => {
+            {featured.map((product, i) => {
               const { primary, secondary } = pickCardImages(product.product_images ?? [])
               return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  primaryImage={primary}
-                  secondaryImage={secondary}
-                />
+                <Reveal key={product.id} index={i}>
+                  <ProductCard
+                    product={product}
+                    primaryImage={primary}
+                    secondaryImage={secondary}
+                  />
+                </Reveal>
               )
             })}
           </div>

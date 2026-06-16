@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { AppLink } from '@/components/app-link'
 import { Logo } from '@/components/logo'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -21,24 +21,24 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)]">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Wordmark */}
-        <Link href="/" className="hover:opacity-70 transition-opacity">
+        <AppLink href="/" className="hover:opacity-70 transition-opacity">
           <Logo />
-        </Link>
+        </AppLink>
 
         {/* Right nav */}
         <nav className="flex items-center gap-6 text-sm">
-          <Link
+          <AppLink
             href="/"
             className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
           >
             Inicio
-          </Link>
-          <Link
+          </AppLink>
+          <AppLink
             href="/productos"
             className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
           >
             Catálogo
-          </Link>
+          </AppLink>
 
           {/* Cart */}
           <CartBadge />
@@ -46,12 +46,12 @@ export async function SiteHeader() {
           {/* Auth area */}
           {user ? (
             <div className="flex items-center gap-4">
-              <Link
+              <AppLink
                 href="/account"
                 className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
               >
                 Mi cuenta
-              </Link>
+              </AppLink>
               <form action={signOut}>
                 <button
                   type="submit"
@@ -62,12 +62,12 @@ export async function SiteHeader() {
               </form>
             </div>
           ) : (
-            <Link
+            <AppLink
               href="/login"
               className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors"
             >
               Iniciar sesión
-            </Link>
+            </AppLink>
           )}
         </nav>
       </div>

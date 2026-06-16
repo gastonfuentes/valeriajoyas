@@ -4,7 +4,7 @@ import { formatARS } from '@/lib/format'
 import Link from 'next/link'
 
 export default function CarritoPage() {
-  const { items, subtotal, removeItem, setQty } = useCart()
+  const { items, subtotal, removeItem, setQty, pending } = useCart()
 
   if (items.length === 0) {
     return (
@@ -17,7 +17,7 @@ export default function CarritoPage() {
         </p>
         <Link
           href="/productos"
-          className="inline-block mt-4 px-6 py-2 bg-[var(--color-primary)] text-white text-sm tracking-widest hover:opacity-90 transition-opacity"
+          className="inline-block mt-4 px-6 py-2 bg-[var(--color-primary)] text-white text-sm tracking-widest hover:opacity-90 transition-opacity press focus-ring"
         >
           Ver catálogo
         </Link>
@@ -44,16 +44,16 @@ export default function CarritoPage() {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setQty(item.variantId, item.quantity - 1)}
-                disabled={item.quantity <= 1}
-                className="w-7 h-7 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:border-[var(--color-primary)] transition-colors disabled:opacity-40"
+                disabled={item.quantity <= 1 || pending.has(item.variantId)}
+                className="w-7 h-7 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:border-[var(--color-primary)] transition-colors press focus-ring disabled:opacity-40"
               >
                 −
               </button>
               <span className="text-sm w-6 text-center">{item.quantity}</span>
               <button
                 onClick={() => setQty(item.variantId, item.quantity + 1)}
-                disabled={item.quantity >= item.maxQty}
-                className="w-7 h-7 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:border-[var(--color-primary)] transition-colors disabled:opacity-40"
+                disabled={item.quantity >= item.maxQty || pending.has(item.variantId)}
+                className="w-7 h-7 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:border-[var(--color-primary)] transition-colors press focus-ring disabled:opacity-40"
               >
                 +
               </button>
@@ -63,7 +63,8 @@ export default function CarritoPage() {
             </p>
             <button
               onClick={() => removeItem(item.variantId)}
-              className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors text-xs shrink-0"
+              disabled={pending.has(item.variantId)}
+              className="text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors press focus-ring text-xs shrink-0 disabled:opacity-40"
             >
               Eliminar
             </button>
@@ -78,7 +79,7 @@ export default function CarritoPage() {
       </div>
       <Link
         href="/checkout"
-        className="block w-full text-center bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity"
+        className="block w-full text-center bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity press focus-ring"
       >
         Finalizar compra
       </Link>

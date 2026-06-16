@@ -259,7 +259,7 @@ export function SettingsForm({
         type="submit"
         disabled={loading}
         aria-busy={loading}
-        className="border border-[var(--color-text)] px-5 py-2 text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-text)] hover:text-white disabled:opacity-50"
+        className="border border-[var(--color-text)] px-5 py-2 text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-text)] hover:text-white disabled:opacity-50 press focus-ring"
       >
         {loading ? 'Guardando…' : 'Guardar ajustes'}
       </button>

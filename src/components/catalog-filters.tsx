@@ -98,7 +98,7 @@ export function CatalogFilters({ categories, currentParams }: CatalogFiltersProp
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => handleCategoryClick(undefined)}
-            className={`px-3 py-1 text-sm border transition-colors ${
+            className={`px-3 py-1 text-sm border transition-colors press focus-ring ${
               !currentCat
                 ? 'border-[var(--color-primary)] text-[var(--color-text)]'
                 : 'border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)]'
@@ -110,7 +110,7 @@ export function CatalogFilters({ categories, currentParams }: CatalogFiltersProp
             <button
               key={cat.id}
               onClick={() => handleCategoryClick(cat.slug)}
-              className={`px-3 py-1 text-sm border transition-colors ${
+              className={`px-3 py-1 text-sm border transition-colors press focus-ring ${
                 currentCat === cat.slug
                   ? 'border-[var(--color-primary)] text-[var(--color-text)]'
                   : 'border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)]'
@@ -145,7 +145,7 @@ export function CatalogFilters({ categories, currentParams }: CatalogFiltersProp
           />
           <button
             onClick={handlePriceApply}
-            className="px-3 py-1.5 bg-[var(--color-primary)] text-white text-xs tracking-widest hover:opacity-90 transition-opacity"
+            className="px-3 py-1.5 bg-[var(--color-primary)] text-white text-xs tracking-widest hover:opacity-90 transition-opacity press focus-ring"
           >
             Aplicar
           </button>
@@ -179,7 +179,7 @@ export function CatalogFilters({ categories, currentParams }: CatalogFiltersProp
       <div className="md:hidden mb-4">
         <button
           onClick={() => setMobileOpen(prev => !prev)}
-          className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] text-sm text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 border border-[var(--color-border)] text-sm text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)] transition-colors press focus-ring"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />

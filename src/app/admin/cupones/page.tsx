@@ -27,7 +27,7 @@ export default async function AdminCuponesPage() {
         </h1>
         <Link
           href="/admin/cupones/nuevo"
-          className="bg-[var(--color-primary)] text-white px-4 py-2 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors whitespace-nowrap"
+          className="bg-[var(--color-primary)] text-white px-4 py-2 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors whitespace-nowrap press focus-ring"
         >
           Nuevo cupón
         </Link>
@@ -73,7 +73,7 @@ export default async function AdminCuponesPage() {
               <Link
                 key={coupon.id}
                 href={`/admin/cupones/${coupon.id}`}
-                className="flex items-center justify-between px-4 py-4 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors gap-4"
+                className="flex items-center justify-between px-4 py-4 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors gap-4 press focus-ring"
               >
                 <div className="min-w-0 space-y-0.5">
                   <span className="text-sm font-medium text-[var(--color-text)] block truncate">

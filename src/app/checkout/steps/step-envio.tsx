@@ -155,7 +155,7 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
           <button
             type="button"
             onClick={handlePickupSubmit}
-            className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity"
+            className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity press focus-ring"
           >
             Continuar
           </button>
@@ -274,7 +274,7 @@ export function StepEnvio({ savedAddresses }: { savedAddresses: AddressRow[] }) 
 
           <button
             type="submit"
-            className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity"
+            className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity press focus-ring"
           >
             Continuar
           </button>

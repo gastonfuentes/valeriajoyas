@@ -142,7 +142,7 @@ export function ProductImagesManager({
                     type="button"
                     onClick={() => handleSetPrimary(img.id)}
                     disabled={pending}
-                    className="text-xs text-[var(--color-muted)] underline disabled:opacity-50"
+                    className="text-xs text-[var(--color-muted)] underline disabled:opacity-50 press focus-ring"
                   >
                     Hacer principal
                   </button>
@@ -151,7 +151,7 @@ export function ProductImagesManager({
                   type="button"
                   onClick={() => handleDelete(img.id)}
                   disabled={pending}
-                  className="text-xs text-red-700 underline disabled:opacity-50"
+                  className="text-xs text-red-700 underline disabled:opacity-50 press focus-ring"
                 >
                   Borrar
                 </button>
@@ -175,7 +175,7 @@ export function ProductImagesManager({
           onClick={() => fileInputRef.current?.click()}
           disabled={pending || atLimit}
           aria-busy={uploading}
-          className="border border-[var(--color-text)] px-5 py-2 text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-text)] hover:text-white disabled:opacity-50"
+          className="border border-[var(--color-text)] px-5 py-2 text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-text)] hover:text-white disabled:opacity-50 press focus-ring"
         >
           {uploading ? 'Subiendo…' : 'Subir imagen'}
         </button>

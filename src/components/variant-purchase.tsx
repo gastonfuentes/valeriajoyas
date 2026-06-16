@@ -25,7 +25,7 @@ function stockLabel(available: number): { text: string; color: string } {
 }
 
 export function VariantPurchase({ product, variants, inventoryMap }: VariantPurchaseProps) {
-  const { add } = useCart()
+  const { add, items, pending } = useCart()
 
   // Default to first variant with stock, else first variant
   const defaultVariant =
@@ -33,7 +33,6 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
 
   const [selectedId, setSelectedId] = useState<string>(defaultVariant?.id ?? '')
   const [qty, setQty] = useState(1)
-  const [added, setAdded] = useState(false)
 
   const selectedVariant = variants.find(v => v.id === selectedId) ?? defaultVariant
 
@@ -47,11 +46,16 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
   const available = inventoryMap[selectedVariant.id] ?? 0
   const stock = stockLabel(available)
 
+  // Feedback derived from the REAL cart, not a fake timer.
+  const isPending = pending.has(selectedVariant.id)
+  const inCart = items.some(i => i.variantId === selectedVariant.id)
+
   // Show variant selector only if more than 1 variant OR single variant has a meaningful name
   const showSelector = variants.length > 1 ||
     (variants.length === 1 && selectedVariant.name !== null && selectedVariant.name !== 'Único')
 
   function handleAdd() {
+    if (isPending) return // guard against double-clicks while the server reconciles
     add({
       variantId: selectedVariant!.id,
       productSlug: product.slug,
@@ -61,8 +65,6 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
       quantity: qty,
       maxQty: available,
     })
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1500)
   }
 
   return (
@@ -84,7 +86,7 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
                     setQty(1)
                   }}
                   disabled={vAvailable === 0}
-                  className={`px-3 py-1.5 text-sm border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`px-3 py-1.5 text-sm border transition-colors press focus-ring disabled:opacity-40 disabled:cursor-not-allowed ${
                     selectedId === v.id
                       ? 'border-[var(--color-primary)] text-[var(--color-text)]'
                       : 'border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-text)]'
@@ -113,7 +115,7 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
           <button
             onClick={() => setQty(q => Math.max(1, q - 1))}
             disabled={qty <= 1 || available === 0}
-            className="w-9 h-10 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-40"
+            className="w-9 h-10 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors press focus-ring disabled:opacity-40"
             aria-label="Restar cantidad"
           >
             −
@@ -122,7 +124,7 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
           <button
             onClick={() => setQty(q => Math.min(available, q + 1))}
             disabled={qty >= available || available === 0}
-            className="w-9 h-10 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-40"
+            className="w-9 h-10 flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition-colors press focus-ring disabled:opacity-40"
             aria-label="Sumar cantidad"
           >
             +
@@ -132,14 +134,14 @@ export function VariantPurchase({ product, variants, inventoryMap }: VariantPurc
         {/* Add to cart button */}
         <button
           onClick={handleAdd}
-          disabled={available === 0}
-          className={`flex-1 h-10 text-sm tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-            added
+          disabled={available === 0 || isPending}
+          className={`flex-1 h-10 text-sm tracking-widest transition-all press focus-ring disabled:opacity-50 disabled:cursor-not-allowed ${
+            inCart
               ? 'bg-green-700 text-white'
               : 'bg-[var(--color-primary)] text-white hover:opacity-90'
           }`}
         >
-          {added ? '✓ Agregado' : 'Agregar al carrito'}
+          {isPending ? 'Agregando…' : inCart ? '✓ En el carrito' : 'Agregar al carrito'}
         </button>
       </div>
     </div>

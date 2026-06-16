@@ -90,7 +90,7 @@ export function StepResumen({
             type="button"
             onClick={handleApplyCoupon}
             disabled={couponLoading}
-            className="px-4 py-2 border border-[var(--color-primary)] text-[var(--color-primary)] text-sm hover:bg-[var(--color-primary)] hover:text-white transition-colors disabled:opacity-50"
+            className="px-4 py-2 border border-[var(--color-primary)] text-[var(--color-primary)] text-sm hover:bg-[var(--color-primary)] hover:text-white transition-colors disabled:opacity-50 press focus-ring"
           >
             {couponLoading ? '…' : 'Aplicar cupón'}
           </button>
@@ -138,7 +138,7 @@ export function StepResumen({
       <button
         type="button"
         onClick={() => setStep('confirmar')}
-        className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity"
+        className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:opacity-90 transition-opacity press focus-ring"
       >
         Confirmar pedido
       </button>

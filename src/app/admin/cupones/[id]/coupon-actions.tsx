@@ -54,14 +54,14 @@ export function CouponActions({
         <button
           type="button"
           onClick={handleToggle}
-          className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors"
+          className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors press focus-ring"
         >
           {isActive ? 'Desactivar' : 'Activar'}
         </button>
         <button
           type="button"
           onClick={handleDelete}
-          className="border border-red-200 text-sm text-red-600 px-4 py-2 hover:bg-red-50 transition-colors"
+          className="border border-red-200 text-sm text-red-600 px-4 py-2 hover:bg-red-50 transition-colors press focus-ring"
         >
           Eliminar
         </button>

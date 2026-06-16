@@ -7,7 +7,7 @@ import { MIN_PASSWORD_LENGTH } from '@/lib/auth/password'
 const inputClass =
   'w-full border border-[var(--color-border)] px-3 py-2.5 text-sm bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-primary)] transition-colors'
 const buttonClass =
-  'w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors'
+  'w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors press focus-ring'
 
 export function ResetForm() {
   const searchParams = useSearchParams()

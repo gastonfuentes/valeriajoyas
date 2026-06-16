@@ -106,7 +106,7 @@ export default async function AdminProductosPage({
               <Link
                 key={product.id}
                 href={`/admin/productos/${product.id}`}
-                className="flex items-center justify-between px-4 py-4 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors gap-4"
+                className="flex items-center justify-between px-4 py-4 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors gap-4 press focus-ring"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-sm font-medium text-[var(--color-text)] truncate">

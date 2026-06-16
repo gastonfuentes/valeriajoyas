@@ -21,7 +21,7 @@ export function RegisterForm() {
         <p className="text-[var(--color-muted)] text-sm">
           Revisá tu email para confirmar tu cuenta.
         </p>
-        <Link href="/login" className="text-sm underline underline-offset-2">
+        <Link href="/login" className="text-sm underline underline-offset-2 press focus-ring">
           Volver al inicio de sesión
         </Link>
       </div>
@@ -88,7 +88,7 @@ export function RegisterForm() {
         </div>
         <button
           type="submit"
-          className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors press focus-ring"
         >
           Crear cuenta
         </button>
@@ -96,7 +96,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-[var(--color-muted)]">
         ¿Ya tenés cuenta?{' '}
-        <Link href="/login" className="text-[var(--color-text)] underline underline-offset-2">
+        <Link href="/login" className="text-[var(--color-text)] underline underline-offset-2 press focus-ring">
           Iniciar sesión
         </Link>
       </p>

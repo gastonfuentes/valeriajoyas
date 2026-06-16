@@ -267,7 +267,7 @@ export function CouponForm({ initial }: { initial?: InitialValues | null }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+        className="w-full bg-[var(--color-primary)] text-white py-3 text-sm tracking-widest hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 press focus-ring"
       >
         {loading ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear cupón'}
       </button>

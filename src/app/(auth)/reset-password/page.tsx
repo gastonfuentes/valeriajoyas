@@ -24,7 +24,7 @@ export default async function ResetPasswordPage() {
         <p className="text-[var(--color-muted)] text-sm">
           El enlace de recuperación no es válido o ya venció. Pedí uno nuevo.
         </p>
-        <Link href="/forgot-password" className="text-sm underline underline-offset-2">
+        <Link href="/forgot-password" className="text-sm underline underline-offset-2 press focus-ring">
           Pedir un enlace nuevo
         </Link>
       </div>

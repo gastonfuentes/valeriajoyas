@@ -44,7 +44,7 @@ export function ProductStatusControl({
             onClick={() => change(s)}
             disabled={loading || s === currentStatus}
             aria-busy={loading}
-            className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors disabled:opacity-50"
+            className="border border-[var(--color-border)] text-sm text-[var(--color-text)] px-4 py-2 hover:bg-[var(--color-background-alt,var(--color-background))] transition-colors disabled:opacity-50 press focus-ring"
           >
             {ACTION_LABELS[s]}
           </button>

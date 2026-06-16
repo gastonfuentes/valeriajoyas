@@ -1,5 +1,7 @@
 'use client'
+import Image from 'next/image'
 import { useState } from 'react'
+import { FadeImage } from '@/components/ui/fade-image'
 import { buildProductImageUrl } from '@/lib/products/image-display'
 
 interface GalleryImage {
@@ -43,12 +45,14 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="aspect-square bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="relative aspect-square bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden">
+        <FadeImage
           src={buildProductImageUrl(selected.storage_path)}
           alt={selected.alt}
-          className="w-full h-full object-cover"
+          fill
+          sizes="(min-width: 768px) 50vw, 100vw"
+          priority
+          className="object-cover"
         />
       </div>
 
@@ -59,18 +63,19 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             <button
               key={idx}
               onClick={() => setSelectedIndex(idx)}
-              className={`shrink-0 w-16 h-16 border overflow-hidden transition-colors ${
+              className={`relative shrink-0 w-16 h-16 border overflow-hidden transition-colors press focus-ring ${
                 idx === selectedIndex
                   ? 'border-[var(--color-primary)]'
                   : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
               }`}
               aria-label={`Ver imagen ${idx + 1}`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={buildProductImageUrl(img.storage_path)}
                 alt={img.alt}
-                className="w-full h-full object-cover"
+                fill
+                sizes="64px"
+                className="object-cover"
               />
             </button>
           ))}
